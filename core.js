@@ -1,4 +1,4 @@
-/* Elixir V1 — core (main world) — by s3m */
+/* Elixir V1 — core (main world) */
 (() => {
   if (window.__elixirV1) return;
   window.__elixirV1 = true;
@@ -206,9 +206,10 @@
   function buildUI() {
     if (document.getElementById("ex-panel")) return;
 
+    // Premium Floating Button
     const trigger = document.createElement("button");
     trigger.id = "ex-trigger";
-    trigger.title = "Show Elixir V1";
+    trigger.innerHTML = "<span>ELIXIR V1</span>";
     document.body.appendChild(trigger);
 
     const panel = document.createElement("div");
@@ -268,7 +269,44 @@
       bypass = localStorage.getItem("elixir_v1_normal") === "true";
     } catch {}
 
-    // ---- MENU DROPDOWN ----
+    // ---- PANEL VISIBILITY & DRAG (TRIGGER) ----
+    const showPanel = (v) => {
+      panel.classList.toggle("open", v);
+      trigger.classList.toggle("show", !v);
+    };
+
+    trigger.onclick = (e) => {
+      if (trigger.dataset.dragging === "true") return;
+      showPanel(true);
+    };
+
+    let dragTrigger = false, tX = 0, tY = 0;
+    trigger.addEventListener("pointerdown", (e) => {
+      dragTrigger = true;
+      trigger.dataset.dragging = "false";
+      tX = e.clientX - trigger.getBoundingClientRect().left;
+      tY = e.clientY - trigger.getBoundingClientRect().top;
+      trigger.setPointerCapture(e.pointerId);
+    });
+    trigger.addEventListener("pointermove", (e) => {
+      if (!dragTrigger) return;
+      trigger.dataset.dragging = "true";
+      let left = e.clientX - tX;
+      let top = e.clientY - tY;
+      left = Math.max(0, Math.min(innerWidth - trigger.offsetWidth, left));
+      top = Math.max(0, Math.min(innerHeight - trigger.offsetHeight, top));
+      trigger.style.left = left + "px";
+      trigger.style.top = top + "px";
+      trigger.style.right = "auto";
+      trigger.style.bottom = "auto";
+    });
+    trigger.addEventListener("pointerup", (e) => {
+      dragTrigger = false;
+      trigger.releasePointerCapture(e.pointerId);
+      setTimeout(() => { trigger.dataset.dragging = "false"; }, 50);
+    });
+
+    // ---- MENU ----
     menuBtn.onclick = (e) => {
       e.stopPropagation();
       dropdown.classList.toggle("show");
@@ -278,16 +316,31 @@
         dropdown.classList.remove("show");
       }
     });
-    
     panel.querySelector("#ex-menu-hide").onclick = () => {
-      panel.classList.remove("open");
-      trigger.classList.add("show");
+      showPanel(false);
       dropdown.classList.remove("show");
     };
     panel.querySelector("#ex-menu-reset").onclick = () => {
       localStorage.clear();
       location.reload();
     };
+
+    // ---- HEADER DRAG ----
+    const topbar = panel.querySelector(".ex-topbar");
+    topbar.addEventListener("pointerdown", e => {
+      if (e.target.closest("button")) return;
+      const rect = panel.getBoundingClientRect();
+      const ox = e.clientX - rect.left, oy = e.clientY - rect.top;
+      panel.style.left = rect.left + "px"; panel.style.top = rect.top + "px";
+      panel.style.right = "auto"; panel.style.bottom = "auto";
+      const move = ev => {
+        panel.style.left = Math.max(4, Math.min(innerWidth - panel.offsetWidth - 4, ev.clientX - ox)) + "px";
+        panel.style.top = Math.max(4, Math.min(innerHeight - panel.offsetHeight - 4, ev.clientY - oy)) + "px";
+      };
+      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
 
     // ---- NAV ----
     TABS.forEach(t => {
@@ -697,12 +750,6 @@
       frame();
     }
 
-    const showPanel = v => {
-      panel.classList.toggle("open", v);
-      trigger.classList.toggle("show", !v);
-    };
-    trigger.onclick = () => showPanel(true);
-
     const PRESET_121 = { preamp: 121, gain: 121, bitrate: 510, exciter: 121, presence: 121, clarity: 121, voiceBoost: 121 };
     const btnNormal = panel.querySelector("#ex-normal");
     const btn121 = panel.querySelector("#ex-121");
@@ -808,23 +855,6 @@
       localStorage.clear();
       location.reload();
     };
-
-    // ---- DRAG ONLY ON HEADER ----
-    const topbar = panel.querySelector(".ex-topbar");
-    topbar.addEventListener("pointerdown", e => {
-      if (e.target.closest("button")) return;
-      const rect = panel.getBoundingClientRect();
-      const ox = e.clientX - rect.left, oy = e.clientY - rect.top;
-      panel.style.left = rect.left + "px"; panel.style.top = rect.top + "px";
-      panel.style.right = "auto"; panel.style.bottom = "auto";
-      const move = ev => {
-        panel.style.left = Math.max(4, Math.min(innerWidth - panel.offsetWidth - 4, ev.clientX - ox)) + "px";
-        panel.style.top = Math.max(4, Math.min(innerHeight - panel.offsetHeight - 4, ev.clientY - oy)) + "px";
-      };
-      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
-      window.addEventListener("pointermove", move);
-      window.addEventListener("pointerup", up);
-    });
 
     render(); updateStatus(); showPanel(true);
     setInterval(updateStatus, 1500);
