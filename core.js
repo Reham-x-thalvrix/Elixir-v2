@@ -237,7 +237,7 @@
       
       <div class="ex-dropdown" id="ex-dropdown">
         <button class="ex-drop-item" id="ex-menu-hide">Hide Panel</button>
-        <button class="ex-drop-item" id="ex-menu-reset">Reset All</button>
+        <button class="ex-drop-item danger" id="ex-menu-reset">Reset All</button>
       </div>
 
       <div class="ex-main">
