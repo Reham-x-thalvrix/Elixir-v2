@@ -1,0 +1,146 @@
+:root {
+  --ex-bg: #0e1116; --ex-surface: #161b22; --ex-surface-2: #1f2530; --ex-surface-3: #293040;
+  --ex-ink: #e6edf3; --ex-ink-dim: #8b949e; --ex-ink-faint: #4a5462; --ex-line: #2d3542;
+  --ex-cyan: #22d3ee; --ex-cyan-dim: #0e7490; --ex-violet: #a78bfa; --ex-lime: #a3e635;
+  --ex-amber: #fbbf24; --ex-rose: #fb7185; --ex-radius: 10px;
+  --ex-font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, monospace;
+  --ex-font-ui: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+#ex-panel {
+  position: fixed; left: 24px; top: 24px; z-index: 2147483647;
+  width: 560px; height: 620px; min-width: 420px; min-height: 380px;
+  max-width: calc(100vw - 32px); max-height: calc(100vh - 32px);
+  resize: both; overflow: hidden; display: none;
+  background: var(--ex-bg); color: var(--ex-ink);
+  border: 1px solid var(--ex-line); border-radius: var(--ex-radius);
+  font-family: var(--ex-font-ui); font-size: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02);
+}
+#ex-panel.open { display: flex; flex-direction: column; }
+
+/* -------- TOP STRIP & MENU -------- */
+.ex-topbar {
+  flex: none; height: 40px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; border-bottom: 1px solid var(--ex-line); background: var(--ex-surface);
+  cursor: move; user-select: none; position: relative;
+}
+.ex-topbar-l, .ex-topbar-r { display: flex; align-items: center; gap: 10px; }
+.ex-brand { display: flex; align-items: center; gap: 8px; font-family: var(--ex-font-mono); font-size: 12px; font-weight: 600; color: var(--ex-ink); }
+.ex-brand-mark { width: 20px; height: 20px; border-radius: 4px; background: var(--ex-surface-3) url("elixir.png") center/contain no-repeat; border: 1px solid var(--ex-line); }
+.ex-version { font-family: var(--ex-font-mono); font-size: 10px; color: var(--ex-ink-dim); }
+.ex-stat-group { display: flex; align-items: center; gap: 6px; font-family: var(--ex-font-mono); font-size: 10px; color: var(--ex-ink-dim); }
+.ex-led { width: 8px; height: 8px; border-radius: 50%; background: var(--ex-ink-faint); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5); transition: background .2s, box-shadow .2s; }
+.ex-led.on { background: var(--ex-lime); box-shadow: 0 0 8px var(--ex-lime); }
+.ex-led.warn { background: var(--ex-amber); box-shadow: 0 0 8px var(--ex-amber); }
+.ex-led.live { background: var(--ex-cyan); box-shadow: 0 0 8px var(--ex-cyan); }
+
+.ex-icon-btn {
+  width: 24px; height: 24px; border-radius: 4px; background: transparent; color: var(--ex-ink-dim);
+  border: 1px solid var(--ex-line); cursor: pointer; font-family: var(--ex-font-mono); font-size: 14px;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.ex-icon-btn:hover { color: var(--ex-ink); background: var(--ex-surface-2); }
+
+/* Dropdown Menu */
+.ex-dropdown {
+  position: absolute; top: 40px; right: 12px; z-index: 10;
+  background: var(--ex-surface-2); border: 1px solid var(--ex-line);
+  border-radius: 6px; padding: 4px; display: none; flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5); min-width: 120px;
+}
+.ex-dropdown.show { display: flex; }
+.ex-drop-item {
+  padding: 8px 12px; border: 0; background: transparent; color: var(--ex-ink);
+  font-family: var(--ex-font-ui); font-size: 11px; text-align: left; cursor: pointer; border-radius: 4px;
+}
+.ex-drop-item:hover { background: var(--ex-surface-3); }
+.ex-drop-item.danger { color: var(--ex-rose); }
+
+/* -------- BODY GRID -------- */
+.ex-main { flex: 1 1 auto; display: flex; min-height: 0; }
+.ex-sidebar { flex: none; width: 130px; background: var(--ex-surface); border-right: 1px solid var(--ex-line); display: flex; flex-direction: column; padding: 10px 8px; gap: 2px; overflow-y: auto; }
+.ex-nav { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; background: transparent; color: var(--ex-ink-dim); border: 0; cursor: pointer; text-align: left; font-family: var(--ex-font-ui); font-size: 11px; font-weight: 500; transition: background .15s, color .15s; }
+.ex-nav:hover { background: var(--ex-surface-2); color: var(--ex-ink); }
+.ex-nav.on { background: var(--ex-surface-2); color: var(--ex-cyan); box-shadow: inset 2px 0 0 var(--ex-cyan); }
+.ex-nav-icon { width: 14px; height: 14px; flex: none; border: 1.5px solid currentColor; border-radius: 3px; }
+.ex-nav[data-tab="main"] .ex-nav-icon { border-radius: 50%; }
+.ex-nav[data-tab="voice"] .ex-nav-icon { border-radius: 3px 3px 3px 0; }
+.ex-nav[data-tab="spatial"] .ex-nav-icon { transform: rotate(45deg); }
+.ex-nav[data-tab="fx"] .ex-nav-icon { border-radius: 0; transform: rotate(45deg); }
+.ex-nav[data-tab="meter"] .ex-nav-icon { border-radius: 0 50% 50% 0; border-right-width: 3px; }
+.ex-nav[data-tab="feat"] .ex-nav-icon { border-width: 3px; border-radius: 3px; }
+
+.ex-content { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; transition: opacity .2s; }
+.ex-content.locked { opacity: 0.35; pointer-events: none; filter: grayscale(0.5); }
+.ex-content::-webkit-scrollbar, .ex-sidebar::-webkit-scrollbar { width: 6px; }
+.ex-content::-webkit-scrollbar-thumb, .ex-sidebar::-webkit-scrollbar-thumb { background: var(--ex-surface-3); border-radius: 3px; }
+
+/* -------- SECTION -------- */
+.ex-section { display: flex; flex-direction: column; gap: 10px; }
+.ex-section-title { font-family: var(--ex-font-mono); font-size: 10px; font-weight: 600; color: var(--ex-ink-dim); letter-spacing: 0.14em; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px dashed var(--ex-line); }
+
+/* -------- KNOB -------- */
+.ex-knob-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.ex-knob { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px 8px; background: var(--ex-surface); border: 1px solid var(--ex-line); border-radius: var(--ex-radius); user-select: none; }
+.ex-knob-label { font-family: var(--ex-font-mono); font-size: 9px; font-weight: 600; color: var(--ex-ink-dim); letter-spacing: 0.1em; text-transform: uppercase; order: 2; }
+.ex-knob-value { font-family: var(--ex-font-mono); font-size: 11px; color: var(--ex-ink); font-variant-numeric: tabular-nums; order: 3; min-height: 14px; }
+.ex-knob-dial { position: relative; width: 64px; height: 64px; cursor: ns-resize; order: 1; touch-action: none; }
+.ex-knob-dial svg { display: block; width: 100%; height: 100%; }
+.ex-knob-track { fill: none; stroke: var(--ex-surface-3); stroke-width: 5; stroke-linecap: round; }
+.ex-knob-fill { fill: none; stroke: var(--ex-cyan); stroke-width: 5; stroke-linecap: round; transition: stroke .15s; filter: drop-shadow(0 0 4px rgba(34,211,238,0.4)); }
+.ex-knob.hot .ex-knob-fill { stroke: var(--ex-amber); }
+.ex-knob.max .ex-knob-fill { stroke: var(--ex-rose); }
+.ex-knob-cap { position: absolute; inset: 8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--ex-surface-3), var(--ex-surface-2)); border: 1px solid var(--ex-line); box-shadow: inset 0 2px 4px rgba(255,255,255,0.04), inset 0 -2px 4px rgba(0,0,0,0.5); }
+.ex-knob-pointer { position: absolute; left: 50%; top: 12px; width: 2px; height: 12px; margin-left: -1px; background: var(--ex-cyan); border-radius: 1px; transform-origin: 50% 20px; box-shadow: 0 0 4px var(--ex-cyan); }
+
+/* -------- LED BUTTON -------- */
+.ex-led-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.ex-led-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--ex-surface); border: 1px solid var(--ex-line); border-radius: var(--ex-radius); color: var(--ex-ink-dim); cursor: pointer; font-family: var(--ex-font-ui); font-size: 11px; text-align: left; transition: all .15s; }
+.ex-led-btn:hover { border-color: var(--ex-ink-faint); color: var(--ex-ink); }
+.ex-led-btn .ex-led { width: 10px; height: 10px; border-radius: 50%; background: var(--ex-surface-3); box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4); transition: all .15s; }
+.ex-led-btn.on { color: var(--ex-ink); border-color: var(--ex-cyan-dim); background: var(--ex-surface-2); }
+.ex-led-btn.on .ex-led { background: var(--ex-lime); box-shadow: 0 0 10px var(--ex-lime), inset 0 0 0 1px rgba(163,230,53,0.5); }
+.ex-led-btn-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ex-led-btn-name { font-family: var(--ex-font-mono); font-size: 10px; font-weight: 600; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ex-led-btn-sub { font-size: 9px; color: var(--ex-ink-faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* -------- METERS -------- */
+.ex-meter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ex-meter-card { background: var(--ex-surface); border: 1px solid var(--ex-line); border-radius: var(--ex-radius); padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.ex-meter-card.wide { grid-column: 1 / -1; }
+.ex-meter-head { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--ex-font-mono); font-size: 9px; color: var(--ex-ink-dim); text-transform: uppercase; }
+.ex-meter-head b { color: var(--ex-ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.ex-meter-canvas { width: 100%; height: 90px; display: block; background: #0a0d12; border-radius: 6px; border: 1px solid var(--ex-line); }
+.ex-meter-canvas.tall { height: 120px; }
+
+/* -------- CONSOLE -------- */
+.ex-console { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: #0a0d12; border: 1px solid var(--ex-line); border-radius: var(--ex-radius); font-family: var(--ex-font-mono); font-size: 11px; color: var(--ex-ink-dim); }
+.ex-console-row { display: flex; align-items: baseline; gap: 14px; padding: 3px 0; border-bottom: 1px dashed rgba(45,53,66,0.5); }
+.ex-console-row:last-child { border-bottom: 0; }
+.ex-console-key { flex: none; width: 64px; color: var(--ex-cyan); font-weight: 600; font-size: 10px; }
+.ex-console-val { color: var(--ex-ink-dim); font-size: 11px; white-space: nowrap; }
+.ex-console-val b { color: var(--ex-ink); font-weight: 600; margin-left: 2px; }
+
+/* -------- FOOTER -------- */
+.ex-footer { flex: none; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 10px 12px; background: var(--ex-surface); border-top: 1px solid var(--ex-line); }
+.ex-btn { padding: 8px 0; border-radius: 6px; background: var(--ex-surface-2); color: var(--ex-ink); border: 1px solid var(--ex-line); cursor: pointer; font-family: var(--ex-font-mono); font-size: 10px; font-weight: 600; text-transform: uppercase; transition: all .15s; }
+.ex-btn:hover { background: var(--ex-surface-3); border-color: var(--ex-ink-faint); }
+.ex-btn.primary { color: var(--ex-cyan); border-color: var(--ex-cyan-dim); }
+.ex-btn.danger { color: var(--ex-rose); border-color: rgba(251,113,133,0.3); }
+.ex-btn.normal { color: var(--ex-ink-dim); font-weight: 800; }
+.ex-btn.normal.on { background: var(--ex-ink-faint); color: #fff; border-color: var(--ex-ink); }
+.ex-btn.preset { color: var(--ex-amber); font-weight: 800; }
+.ex-btn.preset.on { background: var(--ex-amber); color: #000; border-color: var(--ex-amber); }
+
+/* -------- FLOATING TRIGGER -------- */
+#ex-trigger { position: fixed; right: 16px; bottom: 16px; z-index: 2147483646; width: 44px; height: 44px; border-radius: 50%; background: var(--ex-surface); border: 1px solid var(--ex-line); cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+#ex-trigger.show { display: flex; }
+#ex-trigger::after { content: "E"; font-family: var(--ex-font-mono); font-size: 18px; font-weight: 700; color: var(--ex-cyan); }
+
+/* -------- PASTE MODAL -------- */
+.ex-modal-backdrop { position: fixed; inset: 0; z-index: 2147483648; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; font-family: var(--ex-font-ui); }
+.ex-modal { width: min(440px, calc(100vw - 32px)); background: var(--ex-bg); border: 1px solid var(--ex-line); border-radius: var(--ex-radius); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+.ex-modal-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--ex-line); background: var(--ex-surface); font-family: var(--ex-font-mono); font-size: 10px; color: var(--ex-ink-dim); }
+.ex-modal-input { width: 100%; box-sizing: border-box; min-height: 200px; max-height: 40vh; padding: 12px; background: #0a0d12; color: var(--ex-ink); border: 0; border-bottom: 1px solid var(--ex-line); font-family: var(--ex-font-mono); font-size: 11px; resize: vertical; outline: none; }
+.ex-modal-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 12px; background: var(--ex-surface); }
