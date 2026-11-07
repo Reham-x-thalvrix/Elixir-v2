@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Elixir V1",
+  "name": "Elixir V1 Premium",
   "version": "1.0.0",
-  "description": "Pro voice DSP for Discord",
+  "description": "Professional Voice DSP for Discord",
   "icons": {
     "16": "elixir.png",
     "48": "elixir.png",
@@ -18,7 +18,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["core.js", "elixir.png", "bg.gif"],
+      "resources": ["core.js", "elixir.png"],
       "matches": ["*://*.discord.com/*"]
     }
   ]
